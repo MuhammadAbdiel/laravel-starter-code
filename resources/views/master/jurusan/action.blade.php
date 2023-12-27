@@ -17,7 +17,7 @@
                 <div class="form-message text-center"></div>
 
                 <div class="form-group required row mb-2">
-                    <label class="col-sm-3 control-label col-form-label">Periode</label>
+                    <label class="col-sm-3 control-label col-form-label">Jurusan</label>
                     <div class="col-sm-9">
                         <input @if($is_edit) disabled @endif type="text" class="form-control form-control-sm" id="jurusan_code" name="jurusan_code" value="{{ isset($data->jurusan_code) ? $data->jurusan_code : '' }}"/>
                     </div>

@@ -80,12 +80,6 @@
                         </div>
                     </div>
                 </form>
-                <div class="social-auth-links text-center mb-2">
-                    <p>- OR -</p>
-                    <a href="{{ url('login-sso') }}" class="btn btn-block btn-info">
-                        <i class="fab fa-google mr-2"></i> Login SSO email Polinema
-                    </a>
-                </div>
             </div>
         </div>
     </div>
