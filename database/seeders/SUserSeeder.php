@@ -20,29 +20,29 @@ class SUserSeeder extends Seeder
                 'group_id'  => 1, // Super Admin
                 'username'  => 'superadmin',
                 'name'      => 'Super Administrator',
-                'email'     => '',
+                'email'     => 'super@admin.com',
                 'password'  => password_hash('12345', PASSWORD_DEFAULT),
             ],[
                 'user_id'   => 2, // Admin
                 'group_id'  => 2, // Admin
                 'username'  => 'admin',
                 'name'      => 'Administrator',
-                'email'     => '',
+                'email'     => 'admin@admin.com',
                 'password'  => password_hash('12345', PASSWORD_DEFAULT),
             ],[
-                'user_id'   => 3, // 
+                'user_id'   => 3, //
                 'group_id'  => 3, // Dosen
                 'username'  => 'dosen',
                 'name'      => 'Dosen',
-                'email'     => '',
+                'email'     => 'dosen@admin.com',
                 'password'  => password_hash('12345', PASSWORD_DEFAULT),
             ],
             [
-                'user_id'   => 4, // 
+                'user_id'   => 4, //
                 'group_id'  => 4, // Mahasiswa
                 'username'  => 'mahasiswa',
                 'name'      => 'Mahasiswa',
-                'email'     => '',
+                'email'     => 'mahasiswa@admin.com',
                 'password'  => password_hash('12345', PASSWORD_DEFAULT),
             ]
         ]);
