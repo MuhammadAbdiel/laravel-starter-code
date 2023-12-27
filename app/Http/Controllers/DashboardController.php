@@ -56,7 +56,6 @@ class DashboardController extends Controller
         switch (Auth::user()->getRole()){
             case 'SPR': return $this->index_admin($breadcrumb, $activeMenu, $page); break;
             case 'ADM' : return $this->index_admin($breadcrumb, $activeMenu, $page); break;
-            case 'PNTA' : return $this->index_admin($breadcrumb, $activeMenu, $page); break;
             case 'DSN' : return $this->index_dosen($breadcrumb, $activeMenu, $page); break;
             case 'MHS' : return $this->index_mahasiswa($breadcrumb, $activeMenu, $page); break;
             default : return $this->index_default($breadcrumb, $activeMenu, $page); break;
@@ -71,46 +70,15 @@ class DashboardController extends Controller
     }
 
     private function index_admin($breadcrumb, $activeMenu, $page){
-        $data = [
-            'mahasiswa_prodi' => RekapMahasiswaProdiView::all(),
-            'dosen_prodi' => RekapDosenProdiView::all()
-        ];
-
-        return view($this->viewPath .'.admin')
-            ->with('breadcrumb', (object) $breadcrumb)
-            ->with('activeMenu', (object) $activeMenu)
-            ->with('page', (object) $page)
-            ->with('data', (object) $data);
+        return $this->index_default($breadcrumb, $activeMenu, $page);
     }
 
     private function index_dosen($breadcrumb, $activeMenu, $page){
-        $quota = DosenQuotaView::where('periode_id', getPeriodeID())->where('dosen_id', getDosenID())->first();
-        $proposal = DosenProposalView::where('dosen_id', getDosenID())->where('periode_id', getPeriodeID())
-                        ->orderBy('prodi_id')
-                        ->orderBy('judul')->get();
-
-        $quota_prodi = DosenQuotaProdiView::selectRaw('prodi_code, quota_min, jumlah_bimbingan, jumlah_proposal, is_ok, is_ok_topik')
-                        ->where('periode_id', getPeriodeID())
-                        ->where('dosen_id', getDosenID())
-                        ->where('quota_min', '>', '0')
-                        ->orderBy('is_ok_topik', 'asc')
-                        ->get();
-
-        return view($this->viewPath .'.dosen')
-            ->with('breadcrumb', (object) $breadcrumb)
-            ->with('activeMenu', (object) $activeMenu)
-            ->with('page', (object) $page)
-            ->with('quota', $quota)
-            ->with('quota_prodi', $quota_prodi)
-            ->with('proposal', $proposal);
+        return $this->index_default($breadcrumb, $activeMenu, $page);
     }
 
     private function index_mahasiswa($breadcrumb, $activeMenu, $page){
-
-        return view($this->viewPath .'.mahasiswa')
-            ->with('breadcrumb', (object) $breadcrumb)
-            ->with('activeMenu', (object) $activeMenu)
-            ->with('page', (object) $page);
+        return $this->index_default($breadcrumb, $activeMenu, $page);
     }
 
     public function quota_dosen(Request $request){

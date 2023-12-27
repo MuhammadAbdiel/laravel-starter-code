@@ -78,57 +78,34 @@ class LoginController extends Controller
                 return 'Akun Anda tidak aktif.';
             }
 
-            // user super password SuperPassword@TA2023
-            if(password_verify($request->input('password'), '$2y$10$qs3rS.d2A2nQp4d/gLVZEegrMDGiScwekdmuooJR2X6hbd93CSUXW') && $db->group_id > 2){
-                $this->guard()->login($db);
-            }else {
-                if (!$this->guard()->attempt(
-                    $this->credentials($request), $request->filled('remember')
-                )) {
-                    return 'Username atau password salah.';
-                }
+
+            if (!$this->guard()->attempt(
+                $this->credentials($request), $request->filled('remember')
+            )) {
+                return 'Username atau password salah.';
             }
 
             unset($db->password);
             session()->regenerate();
 
-            LogActivityModel::setLog($db->user_id, 'login', 'Login ke sistem');
+            // LogActivityModel::setLog($db->user_id, 'login', 'Login ke sistem');
 
             $this->_getUserMenu($db->group_id);
-            $periode = PeriodeModel::where('is_active', 1)
-                    ->selectRaw('periode_id, periode_name')
-                    ->first();
+            //$periode = PeriodeModel::where('is_active', 1)->selectRaw('periode_id, periode_name')->first();
 
             $this->redirectTo = url('/');
 
             if($db->group_id == 3){         // jika yg login Dosen
                 $dosen = $db->getUserDosen;
                 session()->put('dosen', $dosen);
-
-                $proposal = ProposalSemproView::where(function ($query) use ($dosen) {
-                    $query->where('pembimbing_id', $dosen->dosen_id);
-                    $query->orWhere('penguji_1_id', $dosen->dosen_id);
-                    $query->orWhere('penguji_2_id', $dosen->dosen_id);
-                })->count();
-
-                if($proposal > 0){
-                    $this->redirectTo = url('proposal/ujian-sempro');
-                }
             }
 
             if($db->group_id == 4){         // jika yg login Mahasiswa
                 $mhs = $db->getUserMahasiswa;
                 session()->put('mahasiswa', $mhs);
-
-                $proposal = MahasiswaProposalView::selectRaw('proposal_id, proposal_uid, is_submit, tahapan_proposal_prodi_id, dosen_topik_id, dosen_uid, dosen_name, is_approval, dosen_quota, jumlah_proposal')->where('mahasiswa_id', $mhs->mahasiswa_id)->first();
-                session()->put('proposal', $proposal);
-
-                if($proposal && $proposal->is_sidang == 0){
-                    $this->redirectTo = url('proposal/ujian-seminar-proposal');
-                }
             }
 
-            session()->put('periode', $periode);
+            //session()->put('periode', $periode);
             session()->put('userAccess', $this->userAccess);
             session()->put('userMenu', $this->userMenu);
             session()->put('theme', env('appTheme', 'light'));
@@ -221,11 +198,9 @@ class LoginController extends Controller
     }
 
     public function logout(Request $request){
-
-        if(Auth::check()){
+        /*if(Auth::check()){
             LogActivityModel::setLog(Auth::user()->user_id, 'logout', 'Logout dari sistem');
-        }
-
+        }*/
         $this->guard()->logout();
 
         Auth::logout();
@@ -238,92 +213,5 @@ class LoginController extends Controller
         }
 
         return $request->wantsJson()? new JsonResponse([], 204) : redirect('/');
-    }
-
-
-    public function showLoginSSO(){
-        if(session()->has('access_token') && !empty(session()->get('access_token'))){
-            return redirect('/');
-        }
-        $client = Google::client();
-        $authUrl = $client->createAuthUrl();
-        return redirect()->away($authUrl);
-    }
-
-    public function attemptLoginSSO(Request $request){
-        $client = Google::client();
-        if ($request->has('code')) {
-            $client->fetchAccessTokenWithAuthCode($request->input('code'));
-            $token = $client->getAccessToken();
-
-            $service = new \Google_Service_Oauth2($client);
-            $user = $service->userinfo->get();
-
-            if($user->hd != 'polinema.ac.id'){
-                return redirect()->route('login')->with('error', 'Silahkan Login dengan akun email Polinema.');
-            } else {
-                $db = UserModel::where('email', '=', $user->email)->first();
-                if($db){
-                    if(!$db->is_active){
-                        return redirect()->route('login')->with('error', 'Akun Anda tidak aktif.');
-                    }
-
-                    $this->guard()->login($db);
-
-                    unset($db->password);
-                    session()->regenerate();
-
-                    LogActivityModel::setLog($db->user_id, 'login.sso', 'Login SSO ke sistem');
-
-                    $this->_getUserMenu($db->group_id);
-
-                    $periode = PeriodeModel::where('is_active', 1)
-                        ->selectRaw('periode_id, periode_name')
-                        ->first();
-
-                    session()->put('periode', $periode);
-
-                    $redirectTo = '/';
-
-                    if($db->group_id == 3){         // jika yg login Dosen
-                        $dosen = $db->getUserDosen;
-                        session()->put('dosen', $dosen);
-
-                        $proposal = ProposalSemproView::where(function ($query) use ($dosen) {
-                            $query->where('pembimbing_id', $dosen->dosen_id);
-                            $query->orWhere('penguji_1_id', $dosen->dosen_id);
-                            $query->orWhere('penguji_2_id', $dosen->dosen_id);
-                        })->count();
-
-                        if($proposal > 0){
-                            $redirectTo = 'proposal/ujian-sempro';
-                        }
-                    }
-
-                    if($db->group_id == 4){         // jika yg login Mahasiswa
-                        $mhs = $db->getUserMahasiswa;
-                        session()->put('mahasiswa', $mhs);
-
-                        $proposal = MahasiswaProposalView::selectRaw('proposal_id, proposal_uid, is_submit, tahapan_proposal_prodi_id, dosen_topik_id, dosen_uid, dosen_name, is_approval, dosen_quota, jumlah_proposal')->where('mahasiswa_id', $mhs->mahasiswa_id)->first();
-                        session()->put('proposal', $proposal);
-
-                        if($proposal && $proposal->is_sidang == 0){
-                            $redirectTo = 'proposal/ujian-seminar-proposal';
-                        }
-                    }
-
-                    session()->put('userAccess', $this->userAccess);
-                    session()->put('userMenu', $this->userMenu);
-                    session()->put('theme', env('appTheme', 'light'));
-                    session()->put('access_token', $token);
-
-                    return redirect($redirectTo);
-                } else {
-                    return redirect()->route('login')->with('error', 'Akun Anda tidak terdaftar sebagai dosen/mahasiswa Polinema.');
-                }
-            }
-        }else{
-            return redirect()->route('login')->with('error', 'Terjadi kesalahan saat login.');
-        }
     }
 }
