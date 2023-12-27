@@ -23,7 +23,7 @@ use App\Http\Controllers\Setting\UserController;
 use App\Http\Controllers\Transaction\QuotaDosenController;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'admin', 'middleware' => ['auth']], function() {
+Route::group(['prefix' => 'master', 'middleware' => ['auth']], function() {
 
     // Jurusan
     Route::resource('jurusan', JurusanController::class)->parameter('jurusan', 'id');
@@ -35,5 +35,5 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth']], function() {
     Route::post('prodi/list', [ProdiController::class, 'list']);
     Route::get('prodi/{id}/delete', [ProdiController::class, 'confirm']);
 
-    
+
 });
