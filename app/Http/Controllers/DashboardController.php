@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Master\JurusanModel;
+use App\Models\Master\ProdiModel;
 use App\Models\View\BeritaView;
 use App\Models\View\DosenProposalView;
 use App\Models\View\DosenQuotaProdiView;
@@ -60,6 +62,15 @@ class DashboardController extends Controller
             case 'MHS' : return $this->index_mahasiswa($breadcrumb, $activeMenu, $page); break;
             default : return $this->index_default($breadcrumb, $activeMenu, $page); break;
         }
+
+        $prodi = ProdiModel::selectRaw("prodi_id, prodi_name")
+            ->where('jurusan_id', getJurusanID())
+            ->where('prodi_status', '1')
+            ->orderBy('prodi_name', 'asc')->get();
+
+        $jurusan = JurusanModel::selectRaw("jurusan_id, jurusan_name")
+            ->where('jurusan_status', '1')
+            ->orderBy('jurusan_name', 'asc')->get();
     }
 
     private function index_default($breadcrumb, $activeMenu, $page){
