@@ -38,18 +38,23 @@ class UserModel extends Authenticatable
         'deleted_by'
     ];
 
-
+    public function group()
+    {
+        return $this->belongsTo(GroupModel::class, 'group_id', 'group_id');
+    }
 
     public function role()
     {
         return $this->hasOne(GroupModel::class, 'group_id', 'group_id');
     }
 
-    public function getRole(){
+    public function getRole()
+    {
         return $this->role->group_code;
     }
 
-    public function getRoleName(){
+    public function getRoleName()
+    {
         return $this->role->group_name;
     }
 
@@ -104,7 +109,8 @@ class UserModel extends Authenticatable
 
 
 
-    public static function insertData($request){
+    public static function insertData($request)
+    {
         $data = $request->except(['_token', '_method']);
         $data['created_by'] = Auth::user()->user_id;
         $data['created_at'] = date('Y-m-d H:i:s');
@@ -113,14 +119,15 @@ class UserModel extends Authenticatable
         return self::insert($data);     // return status insert data
     }
 
-    public static function updateData($id, $request){
+    public static function updateData($id, $request)
+    {
         $data = $request->except(['_token', '_method']);
         $data['updated_by'] = Auth::user()->user_id;
         $data['updated_at'] = date('Y-m-d H:i:s');
 
-        if(!empty($data['password'])){
+        if (!empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
-        }else{
+        } else {
             unset($data['password']);
         }
 
@@ -128,7 +135,8 @@ class UserModel extends Authenticatable
             ->update($data);
     }
 
-    public static function deleteData($id){
+    public static function deleteData($id)
+    {
         $data['deleted_by'] = Auth::user()->user_id;
         $data['deleted_at'] = date('Y-m-d H:i:s');
 

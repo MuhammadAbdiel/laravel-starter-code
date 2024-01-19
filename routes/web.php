@@ -1,9 +1,10 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Setting\AccountController;
 
 Route::pattern('INV', '[A-Z0-9]{12}'); // Filter Parameter INVOICE
 Route::pattern('theme', '[a-z]+'); // Filter Parameter INVOICE
@@ -24,16 +25,16 @@ Route::get('/home', [DashboardController::class, 'index'])->middleware('auth');
 // theme
 Route::get('/theme/{theme}', [\App\Http\Controllers\Setting\ThemeController::class, 'index']);
 
-Route::group(['prefix' => 'setting', 'middleware' => ['auth']], function(){
-    // profile
+Route::group(['prefix' => 'setting', 'middleware' => ['auth']], function () {
+    // account
     Route::get('account', [AccountController::class, 'index']);
     Route::put('account', [AccountController::class, 'update']);
     Route::put('account/avatar', [AccountController::class, 'update_avatar']);
     Route::put('account/password', [AccountController::class, 'update_password']);
 
     // profile
-    Route::get('profile', [ProfileController::class, 'index']);
-    Route::put('profile', [ProfileController::class, 'update']);
-    Route::put('profile/avatar', [ProfileController::class, 'update_avatar']);
-    Route::put('profile/password', [ProfileController::class, 'update_password']);
+    // Route::get('profile', [ProfileController::class, 'index']);
+    // Route::put('profile', [ProfileController::class, 'update']);
+    // Route::put('profile/avatar', [ProfileController::class, 'update_avatar']);
+    // Route::put('profile/password', [ProfileController::class, 'update_password']);
 });

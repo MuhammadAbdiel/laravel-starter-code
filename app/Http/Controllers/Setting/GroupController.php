@@ -2,34 +2,36 @@
 
 namespace App\Http\Controllers\Setting;
 
-use App\Http\Controllers\Controller;
-use App\Models\Setting\GroupMenuModel;
-use App\Models\Setting\GroupModel;
-use App\Models\Setting\UserModel;
-use App\Models\View\CustomerListView;
-use App\Models\View\UserView;
-use DataTables;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use PHPUnit\TextUI\XmlConfiguration\Group;
-use function redirect;
-use function response;
 use function url;
 use function view;
+use function redirect;
+use function response;
+use Illuminate\Http\Request;
+use App\Models\View\UserView;
+use Illuminate\Validation\Rule;
+use Yajra\DataTables\DataTables;
+use App\Models\Setting\UserModel;
+use App\Models\Setting\GroupModel;
+use App\Http\Controllers\Controller;
+use App\Models\View\CustomerListView;
+use App\Models\Setting\GroupMenuModel;
+use Illuminate\Support\Facades\Validator;
+use PHPUnit\TextUI\XmlConfiguration\Group;
 
 
 class GroupController extends Controller
 {
 
-    public function __construct(){
+    public function __construct()
+    {
         $this->menuCode  = 'SETTING.GROUP';                // kode menu, sesuai dengan code di DB
         $this->menuUrl   = url('setting/group');     // set URL untuk menu ini
         $this->menuTitle = 'Group Pengguna';                 // set nama menu
         $this->viewPath  = 'setting.group.';    // untuk menunjukkan direktori view. Diakhiri dengan tanda titik
     }
 
-    public function index(){
+    public function index()
+    {
         $this->authAction('read');
         $this->authCheckDetailAccess();
 
@@ -49,7 +51,7 @@ class GroupController extends Controller
         // untuk set konten halaman web
         $page = [
             'url' => $this->menuUrl,
-            'title' => 'Daftar '.$this->menuTitle
+            'title' => 'Daftar ' . $this->menuTitle
         ];
 
 
@@ -60,9 +62,10 @@ class GroupController extends Controller
             ->with('allowAccess', $this->authAccessKey());
     }
 
-    public function list(Request $request){
+    public function list(Request $request)
+    {
         $this->authAction('read', 'json');
-        if($this->authCheckDetailAccess() !== true) return $this->authCheckDetailAccess();
+        if ($this->authCheckDetailAccess() !== true) return $this->authCheckDetailAccess();
 
         $data  = GroupModel::selectRaw('group_id, group_code, group_name, is_active');
 
@@ -72,9 +75,10 @@ class GroupController extends Controller
     }
 
 
-    public function create(){
+    public function create()
+    {
         $this->authAction('create', 'modal');
-        if($this->authCheckDetailAccess() !== true) return $this->authCheckDetailAccess();
+        if ($this->authCheckDetailAccess() !== true) return $this->authCheckDetailAccess();
 
         // untuk set konten halaman web
         $page = [
@@ -87,14 +91,15 @@ class GroupController extends Controller
     }
 
 
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         $this->authAction('create', 'json');
-        if($this->authCheckDetailAccess() !== true) return $this->authCheckDetailAccess();
+        if ($this->authCheckDetailAccess() !== true) return $this->authCheckDetailAccess();
 
         // cek untuk Insert/Update/Delete harus via AJAX
         if ($request->ajax() || $request->wantsJson()) {
             $rules = [
-                'group_code' => 'required|string|min:4|max:10|unique:App\Models\Setting\GroupModel',
+                'group_code' => 'required|string|min:3|max:10|unique:App\Models\Setting\GroupModel',
                 'group_name' => 'required|string|max:20',
                 'is_active'      => 'required|integer',
             ];
@@ -115,9 +120,8 @@ class GroupController extends Controller
             return response()->json([
                 'stat' => $res,
                 'mc' => $res, // close modal
-                'msg' => ($res)? $this->getMessage('insert.success') : $this->getMessage('insert.failed')
+                'msg' => ($res) ? $this->getMessage('insert.success') : $this->getMessage('insert.failed')
             ]);
-
         }
 
         return redirect('/');
@@ -125,13 +129,14 @@ class GroupController extends Controller
 
 
     // Fungsi show disini diabaikan dulu untuk setting, karena akan digunakan untuk detail data
-    public function show($id){
+    public function show($id)
+    {
         $this->authAction('read', 'modal');
-        if($this->authCheckDetailAccess() !== true) return $this->authCheckDetailAccess();
+        if ($this->authCheckDetailAccess() !== true) return $this->authCheckDetailAccess();
 
         // untuk set konten halaman web
         $page = [
-            'url' => $this->menuUrl . '/'.$id.'/menu',
+            'url' => $this->menuUrl . '/' . $id . '/menu',
             'title' => 'Detail Hak Akses'
         ];
 
@@ -141,14 +146,15 @@ class GroupController extends Controller
         $menu = GroupMenuModel::getMenuMap($data->group_id);
 
         return view($this->viewPath . 'menu')
-                ->with('page', (object) $page)
-                ->with('data', $data)
-                ->with('menu', $menu);
+            ->with('page', (object) $page)
+            ->with('data', $data)
+            ->with('menu', $menu);
     }
 
-    public function menu_save(Request $request, $id){
+    public function menu_save(Request $request, $id)
+    {
         $this->authAction('update', 'json');
-        if($this->authCheckDetailAccess() !== true) return $this->authCheckDetailAccess();
+        if ($this->authCheckDetailAccess() !== true) return $this->authCheckDetailAccess();
 
         // cek untuk Insert/Update/Delete harus via AJAX
         if ($request->ajax() || $request->wantsJson()) {
@@ -158,7 +164,7 @@ class GroupController extends Controller
             return response()->json([
                 'stat' => $res,
                 'mc' => $res, // close modal
-                'msg' => ($res)? $this->getMessage('update.success') : $this->getMessage('update.failed')
+                'msg' => ($res) ? $this->getMessage('update.success') : $this->getMessage('update.failed')
             ]);
         }
 
@@ -166,34 +172,36 @@ class GroupController extends Controller
     }
 
 
-    public function edit($id){
+    public function edit($id)
+    {
         $this->authAction('update', 'modal');
-        if($this->authCheckDetailAccess() !== true) return $this->authCheckDetailAccess();
+        if ($this->authCheckDetailAccess() !== true) return $this->authCheckDetailAccess();
 
         // untuk set konten halaman web
         $page = [
-            'url' => $this->menuUrl . '/'.$id,
+            'url' => $this->menuUrl . '/' . $id,
             'title' => 'Edit ' . $this->menuTitle
         ];
 
         $data  = GroupModel::find($id);
-        return (!$data)? $this->showModalError() :
+        return (!$data) ? $this->showModalError() :
             view($this->viewPath . 'action')
-                ->with('page', (object) $page)
-                ->with('data', $data)
-                ->with('allowAccess', $this->authAccessKey());
+            ->with('page', (object) $page)
+            ->with('data', $data)
+            ->with('allowAccess', $this->authAccessKey());
     }
 
 
-    public function update(Request $request, $id){
+    public function update(Request $request, $id)
+    {
         $this->authAction('update', 'json');
-        if($this->authCheckDetailAccess() !== true) return $this->authCheckDetailAccess();
+        if ($this->authCheckDetailAccess() !== true) return $this->authCheckDetailAccess();
 
         // cek untuk Insert/Update/Delete harus via AJAX
         if ($request->ajax() || $request->wantsJson()) {
 
             $rules = [
-                'group_code' => ['required','max:10',Rule::unique('s_group')->ignore($id, 'group_id')],
+                'group_code' => ['required', 'max:10', Rule::unique('s_group')->ignore($id, 'group_id')],
                 'group_name' => 'required|string|max:20',
                 'is_active'      => 'required|integer',
             ];
@@ -214,7 +222,7 @@ class GroupController extends Controller
             return response()->json([
                 'stat' => $res,
                 'mc' => $res, // close modal
-                'msg' => ($res)? $this->getMessage('insert.success') : $this->getMessage('insert.failed')
+                'msg' => ($res) ? $this->getMessage('insert.success') : $this->getMessage('insert.failed')
             ]);
         }
 
@@ -222,31 +230,33 @@ class GroupController extends Controller
     }
 
 
-    public function confirm($id){
+    public function confirm($id)
+    {
         $this->authAction('delete', 'modal');
-        if($this->authCheckDetailAccess() !== true) return $this->authCheckDetailAccess();
+        if ($this->authCheckDetailAccess() !== true) return $this->authCheckDetailAccess();
 
         $data  = GroupModel::find($id);
-        return (!$data)? $this->showModalError() :
-            $this->showModalConfirm($this->menuUrl.'/'.$id, [
+        return (!$data) ? $this->showModalError() :
+            $this->showModalConfirm($this->menuUrl . '/' . $id, [
                 'Group Code' => $data->group_code,      // tampilkan data-data yang ditampilkan (untuk dihapus)
                 'Name' => $data->group_name
             ]);
     }
 
-    public function destroy(Request $request, $id){
+    public function destroy(Request $request, $id)
+    {
         $this->authAction('delete', 'json');
-        if($this->authCheckDetailAccess() !== true) return $this->authCheckDetailAccess();
+        if ($this->authCheckDetailAccess() !== true) return $this->authCheckDetailAccess();
 
         // cek untuk Insert/Update/Delete harus via AJAX
         if ($request->ajax() || $request->wantsJson()) {
 
-            $res = GroupModel::DeleteData($id);
+            $res = GroupModel::deleteData($id);
 
             return response()->json([
                 'stat' => $res,
                 'mc' => $res, // close modal
-                'msg' => ($res)? $this->getMessage('delete.success') : $this->getMessage('delete.failed')
+                'msg' => ($res) ? $this->getMessage('delete.success') : $this->getMessage('delete.failed')
             ]);
         }
 
